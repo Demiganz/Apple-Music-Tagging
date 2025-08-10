@@ -56,10 +56,11 @@ Follow the Expo instructions to run on your device/simulator
 
 ### Pre-loaded Demo Data
 The demo includes:
-- **10 popular songs** with realistic metadata and artwork
+- **10 popular songs** with working Spotify album artwork
 - **5 sample tags**: Pop, Favorites, Workout, Chill, Road Trip
 - **Pre-tagged songs** to demonstrate filtering
 - **Mock Apple Music library** with 8 additional songs for import
+- **YouTube integration** - songs open in YouTube when clicked
 
 ### What You Can Test
 
@@ -84,9 +85,9 @@ The demo includes:
 - See realistic import flow and feedback
 
 #### ✅ **Music Playback**
-- Click on any song to "play" it
-- Mock playback with console logging
-- Playback state management
+- Click on any song to open it in YouTube (web) or show YouTube link (mobile)
+- Mock playback simulation with realistic YouTube integration
+- No Apple Music subscription required for testing
 
 #### ✅ **Cross-Platform**
 - Test identical features on web and mobile

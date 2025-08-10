@@ -107,7 +107,7 @@ export default function LibraryPage() {
   const playSong = async (song: Song) => {
     const success = await appleMusicService.playSong(song.apple_music_id);
     if (!success) {
-      alert('Failed to play song. Make sure you have Apple Music subscription.');
+      alert('Failed to play song. In mock mode, songs should open in YouTube.');
     }
   };
 

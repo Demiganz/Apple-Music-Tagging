@@ -98,7 +98,7 @@ export default function LibraryScreen() {
   const playSong = async (song: Song) => {
     const success = await appleMusicService.playSong(song.apple_music_id);
     if (!success) {
-      Alert.alert('Playback Error', 'Failed to play song');
+      Alert.alert('Playback Error', 'Failed to play song. In mock mode, songs should show YouTube links.');
     }
   };
 
