@@ -1,3 +1,5 @@
+import { mockAppleMusicService } from './mockAppleMusicService';
+
 declare global {
   interface Window {
     MusicKit: any;
@@ -7,8 +9,13 @@ declare global {
 class AppleMusicService {
   private musicKit: any = null;
   private isInitialized = false;
+  private useMockData = true; // Set to false when you have real Apple Music credentials
 
   async initialize(): Promise<boolean> {
+    if (this.useMockData) {
+      return await mockAppleMusicService.initialize();
+    }
+
     try {
       if (typeof window === 'undefined' || !window.MusicKit) {
         console.error('MusicKit not available');
@@ -33,6 +40,10 @@ class AppleMusicService {
   }
 
   async authorize(): Promise<boolean> {
+    if (this.useMockData) {
+      return await mockAppleMusicService.authorize();
+    }
+
     if (!this.musicKit) return false;
     
     try {
@@ -45,6 +56,10 @@ class AppleMusicService {
   }
 
   async getUserLibrary(offset: number = 0, limit: number = 100) {
+    if (this.useMockData) {
+      return await mockAppleMusicService.getUserLibrary(offset, limit);
+    }
+
     if (!this.musicKit?.isAuthorized) return null;
 
     try {
@@ -61,6 +76,10 @@ class AppleMusicService {
   }
 
   async playSong(songId: string) {
+    if (this.useMockData) {
+      return await mockAppleMusicService.playSong(songId);
+    }
+
     if (!this.musicKit?.isAuthorized) return false;
 
     try {
@@ -74,14 +93,23 @@ class AppleMusicService {
   }
 
   getCurrentPlaybackState() {
+    if (this.useMockData) {
+      return mockAppleMusicService.getCurrentPlaybackState();
+    }
     return this.musicKit?.player || null;
   }
 
   getUserId(): string | null {
+    if (this.useMockData) {
+      return mockAppleMusicService.getUserId();
+    }
     return this.musicKit?.isAuthorized ? this.musicKit.api.storefrontId : null;
   }
 
   isAuthorized(): boolean {
+    if (this.useMockData) {
+      return mockAppleMusicService.isAppleMusicAuthorized();
+    }
     return this.musicKit?.isAuthorized || false;
   }
 }
