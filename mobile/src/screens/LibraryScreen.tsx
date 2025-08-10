@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { apiClient } from '../services/apiClient';
 import { appleMusicService } from '../services/appleMusicService';
+import TagAssignmentModal from '../components/TagAssignmentModal';
 
 interface Song {
   id: number;
@@ -37,6 +38,8 @@ export default function LibraryScreen() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [showTagModal, setShowTagModal] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -92,28 +95,53 @@ export default function LibraryScreen() {
     }
   };
 
+  const openTagModal = (song: Song) => {
+    setSelectedSong(song);
+    setShowTagModal(true);
+  };
+
+  const closeTagModal = () => {
+    setShowTagModal(false);
+    setSelectedSong(null);
+  };
+
+  const handleTagsUpdated = () => {
+    loadSongs(); // Refresh the songs list
+  };
+
   const renderSong = ({ item }: { item: Song }) => (
-    <TouchableOpacity style={styles.songItem} onPress={() => playSong(item)}>
-      {item.artwork_url && (
-        <Image 
-          source={{ uri: item.artwork_url.replace('{w}x{h}', '60x60') }} 
-          style={styles.artwork}
-        />
-      )}
-      <View style={styles.songInfo}>
-        <Text style={styles.songTitle}>{item.title}</Text>
-        <Text style={styles.songArtist}>{item.artist}</Text>
-        {item.tags && item.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.map((tag, index) => (
-              <View key={index} style={styles.tag}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
+    <View style={styles.songItem}>
+      <TouchableOpacity 
+        style={styles.songContent} 
+        onPress={() => playSong(item)}
+      >
+        {item.artwork_url && (
+          <Image 
+            source={{ uri: item.artwork_url.replace('{w}x{h}', '60x60') }} 
+            style={styles.artwork}
+          />
         )}
-      </View>
-    </TouchableOpacity>
+        <View style={styles.songInfo}>
+          <Text style={styles.songTitle}>{item.title}</Text>
+          <Text style={styles.songArtist}>{item.artist}</Text>
+          {item.tags && item.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.tagButton}
+        onPress={() => openTagModal(item)}
+      >
+        <Text style={styles.tagButtonText}>🏷️</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   const renderTagFilter = ({ item }: { item: Tag }) => (
@@ -198,6 +226,13 @@ export default function LibraryScreen() {
           </View>
         }
       />
+
+      <TagAssignmentModal
+        visible={showTagModal}
+        song={selectedSong}
+        onClose={closeTagModal}
+        onTagsUpdated={handleTagsUpdated}
+      />
     </View>
   );
 }
@@ -270,6 +305,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     alignItems: 'center',
+  },
+  songContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  tagButton: {
+    padding: 8,
+    marginLeft: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tagButtonText: {
+    fontSize: 16,
   },
   artwork: {
     width: 60,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
 import { appleMusicService } from '../services/appleMusicService';
+import TagAssignmentModal from './TagAssignmentModal';
 import './LibraryPage.css';
 
 interface Song {
@@ -27,6 +28,8 @@ export default function LibraryPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [showTagModal, setShowTagModal] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -82,6 +85,21 @@ export default function LibraryPage() {
     if (!success) {
       alert('Failed to play song. Make sure you have Apple Music subscription.');
     }
+  };
+
+  const openTagModal = (song: Song, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent song from playing
+    setSelectedSong(song);
+    setShowTagModal(true);
+  };
+
+  const closeTagModal = () => {
+    setShowTagModal(false);
+    setSelectedSong(null);
+  };
+
+  const handleTagsUpdated = () => {
+    loadSongs(); // Refresh the songs list
   };
 
   const toggleTagFilter = (tagName: string) => {
@@ -189,10 +207,24 @@ export default function LibraryPage() {
                   </div>
                 )}
               </div>
+              <button 
+                className="tag-button"
+                onClick={(e) => openTagModal(song, e)}
+                title="Manage tags"
+              >
+                🏷️
+              </button>
             </div>
           ))
         )}
       </div>
+
+      <TagAssignmentModal
+        isOpen={showTagModal}
+        song={selectedSong}
+        onClose={closeTagModal}
+        onTagsUpdated={handleTagsUpdated}
+      />
     </div>
   );
 }
