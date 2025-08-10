@@ -1,0 +1,99 @@
+import express from 'express';
+import pool from '../db/connection';
+import { authenticateToken, AuthRequest } from '../middleware/auth';
+
+const router = express.Router();
+
+// Import songs from Apple Music
+router.post('/import', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { songs } = req.body;
+    const userId = req.userId!;
+
+    if (!Array.isArray(songs)) {
+      return res.status(400).json({ error: 'Songs array required' });
+    }
+
+    const insertPromises = songs.map(song => 
+      pool.query(
+        `INSERT INTO songs (apple_music_id, title, artist, album, artwork_url, user_id) 
+         VALUES ($1, $2, $3, $4, $5, $6) 
+         ON CONFLICT (apple_music_id, user_id) DO NOTHING`,
+        [song.id, song.attributes.name, song.attributes.artistName, 
+         song.attributes.albumName, song.attributes.artwork?.url, userId]
+      )
+    );
+
+    await Promise.all(insertPromises);
+
+    res.json({ message: 'Songs imported successfully', count: songs.length });
+  } catch (error) {
+    console.error('Import error:', error);
+    res.status(500).json({ error: 'Failed to import songs' });
+  }
+});
+
+// Get user's songs with optional tag filtering
+router.get('/', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId!;
+    const { tags, search, page = 1, limit = 50 } = req.query;
+    
+    const offset = (Number(page) - 1) * Number(limit);
+
+    let query = `
+      SELECT DISTINCT s.*, 
+             ARRAY_AGG(t.name) FILTER (WHERE t.name IS NOT NULL) as tags
+      FROM songs s
+      LEFT JOIN song_tags st ON s.id = st.song_id
+      LEFT JOIN tags t ON st.tag_id = t.id
+      WHERE s.user_id = $1
+    `;
+    
+    const queryParams: any[] = [userId];
+    let paramCount = 1;
+
+    // Add search filter
+    if (search) {
+      paramCount++;
+      query += ` AND (LOWER(s.title) LIKE LOWER($${paramCount}) 
+                     OR LOWER(s.artist) LIKE LOWER($${paramCount}))`;
+      queryParams.push(`%${search}%`);
+    }
+
+    // Add tag filter
+    if (tags && typeof tags === 'string') {
+      const tagArray = tags.split(',');
+      paramCount++;
+      query += ` AND s.id IN (
+        SELECT st.song_id 
+        FROM song_tags st 
+        JOIN tags t ON st.tag_id = t.id 
+        WHERE t.name = ANY($${paramCount}) AND t.user_id = $1
+        GROUP BY st.song_id
+        HAVING COUNT(DISTINCT t.name) = $${paramCount + 1}
+      )`;
+      queryParams.push(tagArray, tagArray.length);
+      paramCount++;
+    }
+
+    query += ` GROUP BY s.id ORDER BY s.title LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
+    queryParams.push(Number(limit), offset);
+
+    const result = await pool.query(query, queryParams);
+    
+    res.json({
+      songs: result.rows,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        hasMore: result.rows.length === Number(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get songs error:', error);
+    res.status(500).json({ error: 'Failed to fetch songs' });
+  }
+});
+
+export default router;
