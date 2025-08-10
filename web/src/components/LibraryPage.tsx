@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
 import { appleMusicService } from '../services/appleMusicService';
+import TagAssignmentModal from './TagAssignmentModal';
 import './LibraryPage.css';
 
 interface Song {
@@ -27,33 +28,59 @@ export default function LibraryPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
-    await Promise.all([loadSongs(), loadTags()]);
-    setIsLoading(false);
-  };
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [showTagModal, setShowTagModal] = useState(false);
 
   const loadSongs = async () => {
-    const result = await apiClient.getSongs({
-      search: searchQuery,
-      tags: selectedTags.join(','),
-    });
+    try {
+      const result = await apiClient.getSongs({
+        search: searchQuery,
+        tags: selectedTags.join(','),
+      });
 
-    if (result.success) {
-      setSongs(result.data.songs);
+      if (result.success) {
+        setSongs(result.data.songs);
+      } else {
+        console.error('Failed to load songs:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading songs:', error);
     }
   };
 
   const loadTags = async () => {
-    const result = await apiClient.getTags();
-    if (result.success) {
-      setTags(result.data);
+    try {
+      const result = await apiClient.getTags();
+      if (result.success) {
+        setTags(result.data);
+      } else {
+        console.error('Failed to load tags:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading tags:', error);
     }
   };
+
+  const loadInitialData = async () => {
+    try {
+      await Promise.all([loadSongs(), loadTags()]);
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load songs when search query or selected tags change
+  useEffect(() => {
+    if (!isLoading) {
+      loadSongs();
+    }
+  }, [searchQuery, selectedTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importFromAppleMusic = async () => {
     setIsImporting(true);
@@ -80,8 +107,24 @@ export default function LibraryPage() {
   const playSong = async (song: Song) => {
     const success = await appleMusicService.playSong(song.apple_music_id);
     if (!success) {
-      alert('Failed to play song. Make sure you have Apple Music subscription.');
+      alert('Failed to play song. In mock mode, songs should open in YouTube.');
     }
+  };
+
+  const openTagModal = (song: Song, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent song from playing
+    setSelectedSong(song);
+    setShowTagModal(true);
+  };
+
+  const closeTagModal = () => {
+    setShowTagModal(false);
+    setSelectedSong(null);
+  };
+
+  const handleTagsUpdated = () => {
+    loadSongs(); // Refresh the songs list
+    loadTags(); // Refresh the tags list with updated counts
   };
 
   const toggleTagFilter = (tagName: string) => {
@@ -89,13 +132,12 @@ export default function LibraryPage() {
       ? selectedTags.filter(t => t !== tagName)
       : [...selectedTags, tagName];
     setSelectedTags(newSelectedTags);
-    // Reload songs with new filter
-    setTimeout(loadSongs, 100);
+    // Don't call loadSongs() here - the useEffect will handle it
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    loadSongs();
+    // The useEffect will handle calling loadSongs() when searchQuery changes
   };
 
   if (isLoading) {
@@ -189,10 +231,24 @@ export default function LibraryPage() {
                   </div>
                 )}
               </div>
+              <button 
+                className="tag-button"
+                onClick={(e) => openTagModal(song, e)}
+                title="Manage tags"
+              >
+                🏷️
+              </button>
             </div>
           ))
         )}
       </div>
+
+      <TagAssignmentModal
+        isOpen={showTagModal}
+        song={selectedSong}
+        onClose={closeTagModal}
+        onTagsUpdated={handleTagsUpdated}
+      />
     </div>
   );
 }

@@ -13,7 +13,8 @@ interface Song {
   title: string;
   artist: string;
   album: string;
-  artwork_url: string;
+  artwork_url?: string; // Made optional since we're removing artwork
+  youtube_id?: string;
   user_id: number;
   created_at: string;
   tags?: string[];
@@ -52,7 +53,7 @@ class MockDataService {
       title: 'Blinding Lights',
       artist: 'The Weeknd',
       album: 'After Hours',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/6b/8e/b5/6b8eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/196589149411.jpg/200x200bb.jpg',
+      youtube_id: '4NRXx6U8ABQ',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -62,7 +63,7 @@ class MockDataService {
       title: 'Shape of You',
       artist: 'Ed Sheeran',
       album: '÷ (Divide)',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/42/b2/0c/42b20c9c-b6c8-5e4c-8b8b-8b8b8b8b8b8b/190295851286.jpg/200x200bb.jpg',
+      youtube_id: 'JGwWNGJdvx8',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -72,7 +73,7 @@ class MockDataService {
       title: 'Watermelon Sugar',
       artist: 'Harry Styles',
       album: 'Fine Line',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/1b/8e/b5/1b8eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886448590415.jpg/200x200bb.jpg',
+      youtube_id: 'E07s5ZYygMg',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -82,7 +83,7 @@ class MockDataService {
       title: 'Good 4 U',
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/a7/8e/b5/a78eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/00602435735849.jpg/200x200bb.jpg',
+      youtube_id: 'gNi_6U5Pm_o',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -92,7 +93,7 @@ class MockDataService {
       title: 'Levitating',
       artist: 'Dua Lipa',
       album: 'Future Nostalgia',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/c7/8e/b5/c78eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/190295252694.jpg/200x200bb.jpg',
+      youtube_id: 'TUVcZfQe-Kw',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -102,7 +103,7 @@ class MockDataService {
       title: 'drivers license',
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/a7/8e/b5/a78eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/00602435735849.jpg/200x200bb.jpg',
+      youtube_id: '8sIJdYOUkjo',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -112,7 +113,7 @@ class MockDataService {
       title: 'Stay',
       artist: 'The Kid LAROI & Justin Bieber',
       album: 'F*CK LOVE 3: OVER YOU',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d5/8e/b5/d58eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895465.jpg/200x200bb.jpg',
+      youtube_id: 'kTJczUoc26U',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -122,7 +123,7 @@ class MockDataService {
       title: 'Industry Baby',
       artist: 'Lil Nas X & Jack Harlow',
       album: 'MONTERO',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e2/8e/b5/e28eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895472.jpg/200x200bb.jpg',
+      youtube_id: 'UTHLKHL_whs',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -132,7 +133,7 @@ class MockDataService {
       title: 'Heat Waves',
       artist: 'Glass Animals',
       album: 'Dreamland',
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/f3/8e/b5/f38eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/602435735856.jpg/200x200bb.jpg',
+      youtube_id: 'mRD0-GxqHVo',
       user_id: 1,
       created_at: new Date().toISOString()
     },
@@ -142,7 +143,7 @@ class MockDataService {
       title: 'As It Was',
       artist: 'Harry Styles',
       album: "Harry's House",
-      artwork_url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/g4/8e/b5/g48eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895489.jpg/200x200bb.jpg',
+      youtube_id: 'H5v3kku4y6Q',
       user_id: 1,
       created_at: new Date().toISOString()
     }

@@ -1,13 +1,13 @@
 // Mock Apple Music service for testing without real Apple Music account
 
 class MockAppleMusicService {
-  private isAuthorized = false;
+  private isAuthorized = true; // Auto-authorize for demo
   private currentPlayingSong: string | null = null;
 
   async initialize(): Promise<boolean> {
     // Simulate initialization delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Mock Apple Music service initialized');
+    console.log('Mock Apple Music service initialized and auto-authorized');
     return true;
   }
 
@@ -29,10 +29,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Anti-Hero',
           artistName: 'Taylor Swift',
-          albumName: 'Midnights',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/h5/8e/b5/h58eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895496.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Midnights'
         }
       },
       {
@@ -40,10 +37,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Flowers',
           artistName: 'Miley Cyrus',
-          albumName: 'Endless Summer Vacation',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/i6/8e/b5/i68eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895503.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Endless Summer Vacation'
         }
       },
       {
@@ -51,10 +45,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Unholy',
           artistName: 'Sam Smith & Kim Petras',
-          albumName: 'Gloria',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/j7/8e/b5/j78eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895510.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Gloria'
         }
       },
       {
@@ -62,10 +53,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'As It Was',
           artistName: 'Harry Styles',
-          albumName: "Harry's House",
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/g4/8e/b5/g48eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895489.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: "Harry's House"
         }
       },
       {
@@ -73,10 +61,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Bad Habit',
           artistName: 'Steve Lacy',
-          albumName: 'Gemini Rights',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/k5/8e/b5/k58eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895517.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Gemini Rights'
         }
       },
       {
@@ -84,10 +69,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'About Damn Time',
           artistName: 'Lizzo',
-          albumName: 'Special',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/l6/8e/b5/l68eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895524.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Special'
         }
       },
       {
@@ -95,10 +77,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Running Up That Hill',
           artistName: 'Kate Bush',
-          albumName: 'Hounds of Love',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/m7/8e/b5/m78eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895531.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Hounds of Love'
         }
       },
       {
@@ -106,10 +85,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'First Class',
           artistName: 'Jack Harlow',
-          albumName: 'Come Home the Kids Miss You',
-          artwork: {
-            url: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/n8/8e/b5/n88eb5d7-8f8b-2c2e-7c6f-8b8b8b8b8b8b/886449895538.jpg/{w}x{h}bb.jpg'
-          }
+          albumName: 'Come Home the Kids Miss You'
         }
       }
     ];
@@ -128,9 +104,49 @@ class MockAppleMusicService {
   async playSong(songId: string): Promise<boolean> {
     if (!this.isAuthorized) return false;
 
+    // Map of song IDs to YouTube video IDs
+    const songToYouTubeMap: { [key: string]: string } = {
+      // Imported songs (from Apple Music mock library)
+      'mock_song_1': 'b1kbLWvqugk', // Anti-Hero - Taylor Swift
+      'mock_song_2': 'G7KNmW9a75Y', // Flowers - Miley Cyrus
+      'mock_song_3': 'Uq9gPaIzbe8', // Unholy - Sam Smith & Kim Petras
+      'mock_song_4': 'H5v3kku4y6Q', // As It Was - Harry Styles
+      'mock_song_5': 'kiEGkl5nkDY', // Bad Habit - Steve Lacy
+      'mock_song_6': 'nPLV7lGbmT4', // About Damn Time - Lizzo
+      'mock_song_7': 'wp43OdtAAkM', // Running Up That Hill - Kate Bush
+      'mock_song_8': 'fLb9UrQz7Nc', // First Class - Jack Harlow
+      // Pre-loaded songs (from backend mock data)
+      'song_1': '4NRXx6U8ABQ', // Blinding Lights - The Weeknd
+      'song_2': 'JGwWNGJdvx8', // Shape of You - Ed Sheeran
+      'song_3': 'E07s5ZYygMg', // Watermelon Sugar - Harry Styles
+      'song_4': 'gNi_6U5Pm_o', // Good 4 U - Olivia Rodrigo
+      'song_5': 'TUVcZfQe-Kw', // Levitating - Dua Lipa
+      'song_6': '8sIJdYOUkjo', // drivers license - Olivia Rodrigo
+      'song_7': 'kTJczUoc26U', // Stay - The Kid LAROI & Justin Bieber
+      'song_8': 'UTHLKHL_whs', // Industry Baby - Lil Nas X & Jack Harlow
+      'song_9': 'mRD0-GxqHVo', // Heat Waves - Glass Animals
+      'song_10': 'H5v3kku4y6Q', // As It Was - Harry Styles
+    };
+
     // Simulate playback
     this.currentPlayingSong = songId;
-    console.log(`Mock: Now playing song ${songId}`);
+    
+    const youtubeId = songToYouTubeMap[songId];
+    if (youtubeId) {
+      const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+      console.log(`Mock: Opening YouTube video for song ${songId}: ${youtubeUrl}`);
+      
+      // For React Native, we would use Linking.openURL
+      // For now, we'll just show an alert with the URL
+      alert(`Mock playback: Opening YouTube video\n${youtubeUrl}`);
+      
+      // In a real React Native app, you would do:
+      // import { Linking } from 'react-native';
+      // Linking.openURL(youtubeUrl);
+    } else {
+      console.log(`Mock: No YouTube mapping found for song ${songId}`);
+      alert(`Mock playback: Would play song ${songId} (no YouTube mapping available)`);
+    }
     
     // Simulate a brief delay for "buffering"
     await new Promise(resolve => setTimeout(resolve, 200));

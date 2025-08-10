@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { apiClient } from '../services/apiClient';
 import { appleMusicService } from '../services/appleMusicService';
+import TagAssignmentModal from '../components/TagAssignmentModal';
 
 interface Song {
   id: number;
@@ -37,15 +38,8 @@ export default function LibraryScreen() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
-    await Promise.all([loadSongs(), loadTags()]);
-    setIsLoading(false);
-  };
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [showTagModal, setShowTagModal] = useState(false);
 
   const loadSongs = async () => {
     const result = await apiClient.getSongs({
@@ -64,6 +58,22 @@ export default function LibraryScreen() {
       setTags(result.data);
     }
   };
+
+  const loadInitialData = async () => {
+    await Promise.all([loadSongs(), loadTags()]);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load songs when search query or selected tags change
+  useEffect(() => {
+    if (!isLoading) {
+      loadSongs();
+    }
+  }, [searchQuery, selectedTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importFromAppleMusic = async () => {
     setIsImporting(true);
@@ -88,32 +98,58 @@ export default function LibraryScreen() {
   const playSong = async (song: Song) => {
     const success = await appleMusicService.playSong(song.apple_music_id);
     if (!success) {
-      Alert.alert('Playback Error', 'Failed to play song');
+      Alert.alert('Playback Error', 'Failed to play song. In mock mode, songs should show YouTube links.');
     }
   };
 
+  const openTagModal = (song: Song) => {
+    setSelectedSong(song);
+    setShowTagModal(true);
+  };
+
+  const closeTagModal = () => {
+    setShowTagModal(false);
+    setSelectedSong(null);
+  };
+
+  const handleTagsUpdated = () => {
+    loadSongs(); // Refresh the songs list
+    loadTags(); // Refresh the tags list with updated counts
+  };
+
   const renderSong = ({ item }: { item: Song }) => (
-    <TouchableOpacity style={styles.songItem} onPress={() => playSong(item)}>
-      {item.artwork_url && (
-        <Image 
-          source={{ uri: item.artwork_url.replace('{w}x{h}', '60x60') }} 
-          style={styles.artwork}
-        />
-      )}
-      <View style={styles.songInfo}>
-        <Text style={styles.songTitle}>{item.title}</Text>
-        <Text style={styles.songArtist}>{item.artist}</Text>
-        {item.tags && item.tags.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.map((tag, index) => (
-              <View key={index} style={styles.tag}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
+    <View style={styles.songItem}>
+      <TouchableOpacity 
+        style={styles.songContent} 
+        onPress={() => playSong(item)}
+      >
+        {item.artwork_url && (
+          <Image 
+            source={{ uri: item.artwork_url.replace('{w}x{h}', '60x60') }} 
+            style={styles.artwork}
+          />
         )}
-      </View>
-    </TouchableOpacity>
+        <View style={styles.songInfo}>
+          <Text style={styles.songTitle}>{item.title}</Text>
+          <Text style={styles.songArtist}>{item.artist}</Text>
+          {item.tags && item.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.tagButton}
+        onPress={() => openTagModal(item)}
+      >
+        <Text style={styles.tagButtonText}>🏷️</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   const renderTagFilter = ({ item }: { item: Tag }) => (
@@ -127,7 +163,7 @@ export default function LibraryScreen() {
           ? selectedTags.filter(t => t !== item.name)
           : [...selectedTags, item.name];
         setSelectedTags(newSelectedTags);
-        loadSongs();
+        // Don't call loadSongs() here - the useEffect will handle it
       }}
     >
       <Text style={[
@@ -156,7 +192,7 @@ export default function LibraryScreen() {
           placeholder="Search songs..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onSubmitEditing={loadSongs}
+          onSubmitEditing={() => {}} // The useEffect will handle the search
         />
         
         <TouchableOpacity 
@@ -197,6 +233,13 @@ export default function LibraryScreen() {
             </Text>
           </View>
         }
+      />
+
+      <TagAssignmentModal
+        visible={showTagModal}
+        song={selectedSong}
+        onClose={closeTagModal}
+        onTagsUpdated={handleTagsUpdated}
       />
     </View>
   );
@@ -270,6 +313,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     alignItems: 'center',
+  },
+  songContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  tagButton: {
+    padding: 8,
+    marginLeft: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tagButtonText: {
+    fontSize: 16,
   },
   artwork: {
     width: 60,

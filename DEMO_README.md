@@ -56,10 +56,11 @@ Follow the Expo instructions to run on your device/simulator
 
 ### Pre-loaded Demo Data
 The demo includes:
-- **10 popular songs** with realistic metadata and artwork
+- **10 popular songs** with working Spotify album artwork
 - **5 sample tags**: Pop, Favorites, Workout, Chill, Road Trip
 - **Pre-tagged songs** to demonstrate filtering
 - **Mock Apple Music library** with 8 additional songs for import
+- **YouTube integration** - songs open in YouTube when clicked
 
 ### What You Can Test
 
@@ -74,9 +75,9 @@ The demo includes:
 
 #### ✅ **Tag System**
 - Create new tags with custom colors
-- Assign tags to songs
-- Remove tags from songs
-- View tag statistics
+- **Assign tags to songs**: Click the 🏷️ button on any song card
+- **Remove tags from songs**: Uncheck tags in the assignment modal
+- View tag statistics and song counts per tag
 
 #### ✅ **Apple Music Import**
 - Click "Import from Apple Music" 
@@ -84,9 +85,9 @@ The demo includes:
 - See realistic import flow and feedback
 
 #### ✅ **Music Playback**
-- Click on any song to "play" it
-- Mock playback with console logging
-- Playback state management
+- Click on any song to open it in YouTube (web) or show YouTube link (mobile)
+- Mock playback simulation with realistic YouTube integration
+- No Apple Music subscription required for testing
 
 #### ✅ **Cross-Platform**
 - Test identical features on web and mobile
@@ -129,16 +130,16 @@ The demo includes:
 1. Open the web app
 2. Click "Connect Apple Music" 
 3. Explore pre-loaded library
-4. Create a new tag (e.g., "Study Music")
-5. Assign the tag to some songs
-6. Filter by your new tag
+4. Create a new tag (e.g., "Study Music") in the Tags page
+5. Go back to Library and click 🏷️ on songs to assign your new tag
+6. Filter by your new tag to see only those songs
 
 ### Scenario 2: Import Flow
 1. Click "Import from Apple Music"
 2. Watch as 8 new songs are imported
 3. Notice the success message
 4. See new songs appear in library
-5. Tag the imported songs
+5. Click 🏷️ on imported songs to tag them with existing tags
 
 ### Scenario 3: Search and Filter
 1. Search for "Harry" - see Harry Styles songs
@@ -150,7 +151,9 @@ The demo includes:
 1. Go to Tags page
 2. Create multiple tags with different colors
 3. See song counts for each tag
-4. Go back to Library and assign your new tags
+4. Go back to Library and click the 🏷️ button on any song
+5. Check/uncheck tags to assign/remove them
+6. See tags update immediately on the song card
 
 ### Scenario 5: Cross-Platform
 1. Test the same features on web and mobile
