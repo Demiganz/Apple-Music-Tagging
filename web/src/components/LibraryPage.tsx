@@ -31,32 +31,56 @@ export default function LibraryPage() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
-    await Promise.all([loadSongs(), loadTags()]);
-    setIsLoading(false);
-  };
-
   const loadSongs = async () => {
-    const result = await apiClient.getSongs({
-      search: searchQuery,
-      tags: selectedTags.join(','),
-    });
+    try {
+      const result = await apiClient.getSongs({
+        search: searchQuery,
+        tags: selectedTags.join(','),
+      });
 
-    if (result.success) {
-      setSongs(result.data.songs);
+      if (result.success) {
+        setSongs(result.data.songs);
+      } else {
+        console.error('Failed to load songs:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading songs:', error);
     }
   };
 
   const loadTags = async () => {
-    const result = await apiClient.getTags();
-    if (result.success) {
-      setTags(result.data);
+    try {
+      const result = await apiClient.getTags();
+      if (result.success) {
+        setTags(result.data);
+      } else {
+        console.error('Failed to load tags:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading tags:', error);
     }
   };
+
+  const loadInitialData = async () => {
+    try {
+      await Promise.all([loadSongs(), loadTags()]);
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load songs when search query or selected tags change
+  useEffect(() => {
+    if (!isLoading) {
+      loadSongs();
+    }
+  }, [searchQuery, selectedTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importFromAppleMusic = async () => {
     setIsImporting(true);
@@ -100,6 +124,7 @@ export default function LibraryPage() {
 
   const handleTagsUpdated = () => {
     loadSongs(); // Refresh the songs list
+    loadTags(); // Refresh the tags list with updated counts
   };
 
   const toggleTagFilter = (tagName: string) => {
@@ -107,13 +132,12 @@ export default function LibraryPage() {
       ? selectedTags.filter(t => t !== tagName)
       : [...selectedTags, tagName];
     setSelectedTags(newSelectedTags);
-    // Reload songs with new filter
-    setTimeout(loadSongs, 100);
+    // Don't call loadSongs() here - the useEffect will handle it
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    loadSongs();
+    // The useEffect will handle calling loadSongs() when searchQuery changes
   };
 
   if (isLoading) {

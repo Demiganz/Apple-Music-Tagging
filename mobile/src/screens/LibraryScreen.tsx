@@ -41,15 +41,6 @@ export default function LibraryScreen() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = async () => {
-    await Promise.all([loadSongs(), loadTags()]);
-    setIsLoading(false);
-  };
-
   const loadSongs = async () => {
     const result = await apiClient.getSongs({
       search: searchQuery,
@@ -67,6 +58,22 @@ export default function LibraryScreen() {
       setTags(result.data);
     }
   };
+
+  const loadInitialData = async () => {
+    await Promise.all([loadSongs(), loadTags()]);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load songs when search query or selected tags change
+  useEffect(() => {
+    if (!isLoading) {
+      loadSongs();
+    }
+  }, [searchQuery, selectedTags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importFromAppleMusic = async () => {
     setIsImporting(true);
@@ -107,6 +114,7 @@ export default function LibraryScreen() {
 
   const handleTagsUpdated = () => {
     loadSongs(); // Refresh the songs list
+    loadTags(); // Refresh the tags list with updated counts
   };
 
   const renderSong = ({ item }: { item: Song }) => (
@@ -155,7 +163,7 @@ export default function LibraryScreen() {
           ? selectedTags.filter(t => t !== item.name)
           : [...selectedTags, item.name];
         setSelectedTags(newSelectedTags);
-        loadSongs();
+        // Don't call loadSongs() here - the useEffect will handle it
       }}
     >
       <Text style={[
@@ -184,7 +192,7 @@ export default function LibraryScreen() {
           placeholder="Search songs..."
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onSubmitEditing={loadSongs}
+          onSubmitEditing={() => {}} // The useEffect will handle the search
         />
         
         <TouchableOpacity 
