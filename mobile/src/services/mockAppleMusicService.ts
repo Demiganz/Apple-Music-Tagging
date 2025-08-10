@@ -29,10 +29,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Anti-Hero',
           artistName: 'Taylor Swift',
-          albumName: 'Midnights',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5'
-          }
+          albumName: 'Midnights'
         }
       },
       {
@@ -40,10 +37,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Flowers',
           artistName: 'Miley Cyrus',
-          albumName: 'Endless Summer Vacation',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273f46b9d202509a8f7384b90de'
-          }
+          albumName: 'Endless Summer Vacation'
         }
       },
       {
@@ -51,10 +45,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Unholy',
           artistName: 'Sam Smith & Kim Petras',
-          albumName: 'Gloria',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273906c160845a048c2d67876d9'
-          }
+          albumName: 'Gloria'
         }
       },
       {
@@ -62,10 +53,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'As It Was',
           artistName: 'Harry Styles',
-          albumName: "Harry's House",
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273be82673b5f79d9658ec0a9fd'
-          }
+          albumName: "Harry's House"
         }
       },
       {
@@ -73,10 +61,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Bad Habit',
           artistName: 'Steve Lacy',
-          albumName: 'Gemini Rights',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273686ac2db86b632ba4bd8e0b8'
-          }
+          albumName: 'Gemini Rights'
         }
       },
       {
@@ -84,10 +69,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'About Damn Time',
           artistName: 'Lizzo',
-          albumName: 'Special',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273e2e352d89826aef6dbd5ff8f'
-          }
+          albumName: 'Special'
         }
       },
       {
@@ -95,10 +77,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'Running Up That Hill',
           artistName: 'Kate Bush',
-          albumName: 'Hounds of Love',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273de09e5e07b9c76415a1d8c2c'
-          }
+          albumName: 'Hounds of Love'
         }
       },
       {
@@ -106,10 +85,7 @@ class MockAppleMusicService {
         attributes: {
           name: 'First Class',
           artistName: 'Jack Harlow',
-          albumName: 'Come Home the Kids Miss You',
-          artwork: {
-            url: 'https://i.scdn.co/image/ab67616d0000b273dc3ffb1c32c50b8d66ed3d12'
-          }
+          albumName: 'Come Home the Kids Miss You'
         }
       }
     ];

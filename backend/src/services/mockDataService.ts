@@ -13,7 +13,7 @@ interface Song {
   title: string;
   artist: string;
   album: string;
-  artwork_url: string;
+  artwork_url?: string; // Made optional since we're removing artwork
   youtube_id?: string;
   user_id: number;
   created_at: string;
@@ -53,7 +53,6 @@ class MockDataService {
       title: 'Blinding Lights',
       artist: 'The Weeknd',
       album: 'After Hours',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273ef6f049cce6544d3f0c5c3c7',
       youtube_id: '4NRXx6U8ABQ',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -64,7 +63,6 @@ class MockDataService {
       title: 'Shape of You',
       artist: 'Ed Sheeran',
       album: '÷ (Divide)',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96',
       youtube_id: 'JGwWNGJdvx8',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -75,7 +73,6 @@ class MockDataService {
       title: 'Watermelon Sugar',
       artist: 'Harry Styles',
       album: 'Fine Line',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273277b3ff8e3114a8b3c1c5ac1',
       youtube_id: 'E07s5ZYygMg',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -86,7 +83,6 @@ class MockDataService {
       title: 'Good 4 U',
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a',
       youtube_id: 'gNi_6U5Pm_o',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -97,7 +93,6 @@ class MockDataService {
       title: 'Levitating',
       artist: 'Dua Lipa',
       album: 'Future Nostalgia',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273ef5c39b3b0b84b4b8b8b8b8b',
       youtube_id: 'TUVcZfQe-Kw',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -108,7 +103,6 @@ class MockDataService {
       title: 'drivers license',
       artist: 'Olivia Rodrigo',
       album: 'SOUR',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a',
       youtube_id: '8sIJdYOUkjo',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -119,7 +113,6 @@ class MockDataService {
       title: 'Stay',
       artist: 'The Kid LAROI & Justin Bieber',
       album: 'F*CK LOVE 3: OVER YOU',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273e2e352d89826aef6dbd5ff8f',
       youtube_id: 'kTJczUoc26U',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -130,7 +123,6 @@ class MockDataService {
       title: 'Industry Baby',
       artist: 'Lil Nas X & Jack Harlow',
       album: 'MONTERO',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273be82673b5f79d9658ec0a9fd',
       youtube_id: 'UTHLKHL_whs',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -141,7 +133,6 @@ class MockDataService {
       title: 'Heat Waves',
       artist: 'Glass Animals',
       album: 'Dreamland',
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b2739e495fb707973f3390850eea',
       youtube_id: 'mRD0-GxqHVo',
       user_id: 1,
       created_at: new Date().toISOString()
@@ -152,7 +143,6 @@ class MockDataService {
       title: 'As It Was',
       artist: 'Harry Styles',
       album: "Harry's House",
-      artwork_url: 'https://i.scdn.co/image/ab67616d0000b273be82673b5f79d9658ec0a9fd',
       youtube_id: 'H5v3kku4y6Q',
       user_id: 1,
       created_at: new Date().toISOString()
