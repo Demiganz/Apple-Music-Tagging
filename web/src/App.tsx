@@ -61,7 +61,7 @@ function App() {
       <div className="app">
         <nav className="navbar">
           <div className="nav-brand">
-            <h1>🎵 Apple Music Tagger</h1>
+            <h1>Apple Music Tagger</h1>
           </div>
           <div className="nav-links">
             <Link to="/library" className="nav-link">Library</Link>

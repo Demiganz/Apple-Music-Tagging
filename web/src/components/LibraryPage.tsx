@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
 import { appleMusicService } from '../services/appleMusicService';
 import TagAssignmentModal from './TagAssignmentModal';
+import LibrarySidebar, { ViewMode } from './LibrarySidebar';
 import './LibraryPage.css';
 
 interface Song {
@@ -21,15 +22,39 @@ interface Tag {
   song_count: number;
 }
 
+interface Album {
+  name: string;
+  artist: string;
+  song_count: number;
+  artwork_urls: string[];
+}
+
+interface Artist {
+  name: string;
+  song_count: number;
+  artwork_urls: string[];
+}
+
 export default function LibraryPage() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
+  
+  // New organizational state
+  const [currentView, setCurrentView] = useState<ViewMode>('songs');
+  const [currentSelection, setCurrentSelection] = useState<{
+    type: 'album' | 'artist';
+    name: string;
+    artist?: string;
+  } | undefined>(undefined);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const loadSongs = async () => {
     try {
@@ -61,9 +86,48 @@ export default function LibraryPage() {
     }
   };
 
+  const loadAlbums = async () => {
+    try {
+      const result = await apiClient.getOrganizedData('albums');
+      if (result.success) {
+        setAlbums(result.data);
+      } else {
+        console.error('Failed to load albums:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading albums:', error);
+    }
+  };
+
+  const loadArtists = async () => {
+    try {
+      const result = await apiClient.getOrganizedData('artists');
+      if (result.success) {
+        setArtists(result.data);
+      } else {
+        console.error('Failed to load artists:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading artists:', error);
+    }
+  };
+
+  const loadSongsByCategory = async (type: 'album' | 'artist', name: string, artist?: string) => {
+    try {
+      const result = await apiClient.getSongsByCategory(type, name, artist);
+      if (result.success) {
+        setSongs(result.data.songs);
+      } else {
+        console.error(`Failed to load songs by ${type}:`, result.error);
+      }
+    } catch (error) {
+      console.error(`Error loading songs by ${type}:`, error);
+    }
+  };
+
   const loadInitialData = async () => {
     try {
-      await Promise.all([loadSongs(), loadTags()]);
+      await Promise.all([loadSongs(), loadTags(), loadAlbums(), loadArtists()]);
     } catch (error) {
       console.error('Error loading initial data:', error);
     } finally {
@@ -71,16 +135,56 @@ export default function LibraryPage() {
     }
   };
 
+  const handleViewChange = (view: ViewMode) => {
+    setCurrentView(view);
+    setCurrentSelection(undefined);
+    setSearchQuery(''); // Clear search when switching views
+    setSelectedTags([]); // Clear tag filters when switching views
+    
+    if (view === 'songs') {
+      loadSongs();
+    }
+    // Albums and artists are already loaded from initial data
+  };
+
+  const handleAlbumClick = (album: Album) => {
+    setCurrentView('album-detail');
+    setCurrentSelection({
+      type: 'album',
+      name: album.name,
+      artist: album.artist
+    });
+    loadSongsByCategory('album', album.name, album.artist);
+  };
+
+  const handleArtistClick = (artist: Artist) => {
+    setCurrentView('artist-detail');
+    setCurrentSelection({
+      type: 'artist',
+      name: artist.name
+    });
+    loadSongsByCategory('artist', artist.name);
+  };
+
+  const handleBackToList = () => {
+    if (currentView === 'album-detail') {
+      setCurrentView('albums');
+    } else if (currentView === 'artist-detail') {
+      setCurrentView('artists');
+    }
+    setCurrentSelection(undefined);
+  };
+
   useEffect(() => {
     loadInitialData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load songs when search query or selected tags change
+  // Load songs when search query or selected tags change (only for songs view)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && currentView === 'songs') {
       loadSongs();
     }
-  }, [searchQuery, selectedTags]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery, selectedTags, currentView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const importFromAppleMusic = async () => {
     setIsImporting(true);
@@ -90,7 +194,10 @@ export default function LibraryPage() {
         const result = await apiClient.importSongs(library.data);
         if (result.success) {
           alert(`Imported ${library.data.length} songs successfully!`);
+          // Refresh all data after import
           loadSongs();
+          loadAlbums();
+          loadArtists();
         } else {
           alert(`Import failed: ${result.error}`);
         }
@@ -140,6 +247,196 @@ export default function LibraryPage() {
     // The useEffect will handle calling loadSongs() when searchQuery changes
   };
 
+  const renderSongsView = () => (
+    <div className="songs-grid">
+      {songs.length === 0 ? (
+        <div className="empty-state">
+          <h3>No songs found</h3>
+          <p>
+            {songs.length === 0 && selectedTags.length === 0 && !searchQuery 
+              ? 'Import songs from Apple Music to get started' 
+              : 'Try adjusting your search or filters'}
+          </p>
+        </div>
+      ) : (
+        songs.map(song => (
+          <div key={song.id} className="song-card" onClick={() => playSong(song)}>
+            <div className="song-artwork">
+              {song.artwork_url ? (
+                <img 
+                  src={song.artwork_url.replace('{w}x{h}', '200x200')} 
+                  alt={`${song.title} artwork`}
+                />
+              ) : (
+                <div className="no-artwork">♪</div>
+              )}
+            </div>
+            <div className="song-info">
+              <h4 className="song-title">{song.title}</h4>
+              <p className="song-artist">{song.artist}</p>
+              <p className="song-album">{song.album}</p>
+              {song.tags && song.tags.length > 0 && (
+                <div className="song-tags">
+                  {song.tags.map((tag, index) => (
+                    <span key={index} className="song-tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button 
+              className="tag-button"
+              onClick={(e) => openTagModal(song, e)}
+              title="Manage tags"
+            >
+              🏷️
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  const renderAlbumsView = () => {
+    const filteredAlbums = albums.filter(album => {
+      if (!searchQuery) return true;
+      const searchLower = searchQuery.toLowerCase();
+      return album.name.toLowerCase().includes(searchLower) || 
+             album.artist.toLowerCase().includes(searchLower);
+    });
+
+    return (
+      <div className="albums-grid">
+        {filteredAlbums.length === 0 ? (
+          <div className="empty-state">
+            <h3>No albums found</h3>
+            <p>
+              {albums.length === 0 
+                ? 'Import songs from Apple Music to see your albums'
+                : 'Try adjusting your search query'}
+            </p>
+          </div>
+        ) : (
+          filteredAlbums.map((album, index) => (
+            <div key={`${album.name}-${album.artist}-${index}`} className="album-card" onClick={() => handleAlbumClick(album)}>
+              <div className="album-artwork">
+                {album.artwork_urls.length > 0 ? (
+                  <img 
+                    src={album.artwork_urls[0].replace('{w}x{h}', '200x200')} 
+                    alt={`${album.name} artwork`}
+                  />
+                ) : (
+                  <div className="no-artwork">💿</div>
+                )}
+              </div>
+              <div className="album-info">
+                <h4 className="album-title">{album.name}</h4>
+                <p className="album-artist">{album.artist}</p>
+                <p className="album-song-count">{album.song_count} songs</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
+  const renderArtistsView = () => {
+    const filteredArtists = artists.filter(artist => {
+      if (!searchQuery) return true;
+      const searchLower = searchQuery.toLowerCase();
+      return artist.name.toLowerCase().includes(searchLower);
+    });
+
+    return (
+      <div className="artists-grid">
+        {filteredArtists.length === 0 ? (
+          <div className="empty-state">
+            <h3>No artists found</h3>
+            <p>
+              {artists.length === 0 
+                ? 'Import songs from Apple Music to see your artists'
+                : 'Try adjusting your search query'}
+            </p>
+          </div>
+        ) : (
+          filteredArtists.map((artist, index) => (
+            <div key={`${artist.name}-${index}`} className="artist-card" onClick={() => handleArtistClick(artist)}>
+              <div className="artist-artwork">
+                {artist.artwork_urls.length > 0 ? (
+                  <img 
+                    src={artist.artwork_urls[0].replace('{w}x{h}', '200x200')} 
+                    alt={`${artist.name} artwork`}
+                  />
+                ) : (
+                  <div className="no-artwork">🎤</div>
+                )}
+              </div>
+              <div className="artist-info">
+                <h4 className="artist-name">{artist.name}</h4>
+                <p className="artist-song-count">{artist.song_count} songs</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'albums':
+        return renderAlbumsView();
+      case 'artists':
+        return renderArtistsView();
+      case 'album-detail':
+      case 'artist-detail':
+        return renderSongsView(); // Show songs for selected album/artist
+      case 'songs':
+      default:
+        return renderSongsView();
+    }
+  };
+
+  const getViewTitle = () => {
+    switch (currentView) {
+      case 'albums':
+        return 'Albums';
+      case 'artists':
+        return 'Artists';
+      case 'album-detail':
+        return currentSelection ? `Songs in "${currentSelection.name}"` : 'Album Songs';
+      case 'artist-detail':
+        return currentSelection ? `Songs by ${currentSelection.name}` : 'Artist Songs';
+      case 'songs':
+      default:
+        return 'Songs';
+    }
+  };
+
+  const shouldShowFilters = () => {
+    return currentView === 'songs' || currentView === 'album-detail' || currentView === 'artist-detail';
+  };
+
+  const shouldShowSearch = () => {
+    return currentView === 'songs' || currentView === 'albums' || currentView === 'artists' || currentView === 'album-detail' || currentView === 'artist-detail';
+  };
+
+  const getSearchPlaceholder = () => {
+    switch (currentView) {
+      case 'albums':
+        return 'Search albums...';
+      case 'artists':
+        return 'Search artists...';
+      case 'album-detail':
+      case 'artist-detail':
+      case 'songs':
+      default:
+        return 'Search songs...';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -150,105 +447,70 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="library-container">
-      <div className="library-header">
-        <h1>Your Music Library</h1>
-        
-        <div className="library-controls">
-          <form onSubmit={handleSearch} className="search-form">
-            <input
-              type="text"
-              placeholder="Search songs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-            <button type="submit" className="search-button">Search</button>
-          </form>
-          
-          <button 
-            className="import-button"
-            onClick={importFromAppleMusic}
-            disabled={isImporting}
-          >
-            {isImporting ? 'Importing...' : 'Import from Apple Music'}
-          </button>
-        </div>
-      </div>
-
-      {tags.length > 0 && (
-        <div className="tags-filter">
-          <h3>Filter by tags:</h3>
-          <div className="tag-filters">
-            {tags.map(tag => (
-              <button
-                key={tag.id}
-                className={`tag-filter ${selectedTags.includes(tag.name) ? 'active' : ''}`}
-                style={{ backgroundColor: selectedTags.includes(tag.name) ? tag.color : '#f0f0f0' }}
-                onClick={() => toggleTagFilter(tag.name)}
-              >
-                {tag.name} ({tag.song_count})
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="songs-grid">
-        {songs.length === 0 ? (
-          <div className="empty-state">
-            <h3>No songs found</h3>
-            <p>
-              {songs.length === 0 && selectedTags.length === 0 && !searchQuery 
-                ? 'Import songs from Apple Music to get started' 
-                : 'Try adjusting your search or filters'}
-            </p>
-          </div>
-        ) : (
-          songs.map(song => (
-            <div key={song.id} className="song-card" onClick={() => playSong(song)}>
-              <div className="song-artwork">
-                {song.artwork_url ? (
-                  <img 
-                    src={song.artwork_url.replace('{w}x{h}', '200x200')} 
-                    alt={`${song.title} artwork`}
-                  />
-                ) : (
-                  <div className="no-artwork">♪</div>
-                )}
-              </div>
-              <div className="song-info">
-                <h4 className="song-title">{song.title}</h4>
-                <p className="song-artist">{song.artist}</p>
-                <p className="song-album">{song.album}</p>
-                {song.tags && song.tags.length > 0 && (
-                  <div className="song-tags">
-                    {song.tags.map((tag, index) => (
-                      <span key={index} className="song-tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button 
-                className="tag-button"
-                onClick={(e) => openTagModal(song, e)}
-                title="Manage tags"
-              >
-                🏷️
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      <TagAssignmentModal
-        isOpen={showTagModal}
-        song={selectedSong}
-        onClose={closeTagModal}
-        onTagsUpdated={handleTagsUpdated}
+    <div className="library-layout">
+      <LibrarySidebar
+        currentView={currentView}
+        onViewChange={handleViewChange}
+        currentSelection={currentSelection}
+        onBackToList={handleBackToList}
+        onCollapseChange={setIsSidebarCollapsed}
       />
+      
+      <div className={`library-main ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div className="library-header">
+          <h1>{getViewTitle()}</h1>
+          
+          <div className="library-controls">
+            {shouldShowSearch() && (
+              <form onSubmit={handleSearch} className="search-form">
+                <input
+                  type="text"
+                  placeholder={getSearchPlaceholder()}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+                <button type="submit" className="search-button">Search</button>
+              </form>
+            )}
+            
+            <button 
+              className="import-button"
+              onClick={importFromAppleMusic}
+              disabled={isImporting}
+            >
+              {isImporting ? 'Importing...' : 'Import from Apple Music'}
+            </button>
+          </div>
+        </div>
+
+        {shouldShowFilters() && tags.length > 0 && (
+          <div className="tags-filter">
+            <h3>Filter by tags:</h3>
+            <div className="tag-filters">
+              {tags.map(tag => (
+                <button
+                  key={tag.id}
+                  className={`tag-filter ${selectedTags.includes(tag.name) ? 'active' : ''}`}
+                  style={{ backgroundColor: selectedTags.includes(tag.name) ? tag.color : '#f0f0f0' }}
+                  onClick={() => toggleTagFilter(tag.name)}
+                >
+                  {tag.name} ({tag.song_count})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {renderContent()}
+
+        <TagAssignmentModal
+          isOpen={showTagModal}
+          song={selectedSong}
+          onClose={closeTagModal}
+          onTagsUpdated={handleTagsUpdated}
+        />
+      </div>
     </div>
   );
 }

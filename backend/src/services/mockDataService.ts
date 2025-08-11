@@ -372,6 +372,88 @@ class MockDataService {
     }
   }
 
+  // Organization methods
+  async getOrganizedData(userId: number, type: 'albums' | 'artists'): Promise<any[]> {
+    const userSongs = this.songs.filter(song => song.user_id === userId);
+    
+    if (type === 'albums') {
+      const albumsMap = new Map<string, any>();
+      
+      userSongs.forEach(song => {
+        const albumKey = `${song.album}_${song.artist}`;
+        if (!albumsMap.has(albumKey)) {
+          albumsMap.set(albumKey, {
+            name: song.album,
+            artist: song.artist,
+            song_count: 0,
+            artwork_urls: []
+          });
+        }
+        const album = albumsMap.get(albumKey)!;
+        album.song_count++;
+        if (song.artwork_url && !album.artwork_urls.includes(song.artwork_url)) {
+          album.artwork_urls.push(song.artwork_url);
+        }
+      });
+      
+      return Array.from(albumsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    } else if (type === 'artists') {
+      const artistsMap = new Map<string, any>();
+      
+      userSongs.forEach(song => {
+        if (!artistsMap.has(song.artist)) {
+          artistsMap.set(song.artist, {
+            name: song.artist,
+            song_count: 0,
+            artwork_urls: []
+          });
+        }
+        const artist = artistsMap.get(song.artist)!;
+        artist.song_count++;
+        if (song.artwork_url && !artist.artwork_urls.includes(song.artwork_url)) {
+          artist.artwork_urls.push(song.artwork_url);
+        }
+      });
+      
+      return Array.from(artistsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    return [];
+  }
+
+  async getSongsByCategory(userId: number, type: 'album' | 'artist', name: string, artist?: string): Promise<Song[]> {
+    let filteredSongs = this.songs.filter(song => song.user_id === userId);
+    
+    if (type === 'album') {
+      filteredSongs = filteredSongs.filter(song => song.album === name);
+      if (artist) {
+        filteredSongs = filteredSongs.filter(song => song.artist === artist);
+      }
+      // Sort by title since we don't have track numbers
+      filteredSongs.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (type === 'artist') {
+      filteredSongs = filteredSongs.filter(song => song.artist === name);
+      // Sort by album, then title
+      filteredSongs.sort((a, b) => {
+        const albumCompare = a.album.localeCompare(b.album);
+        return albumCompare !== 0 ? albumCompare : a.title.localeCompare(b.title);
+      });
+    }
+
+    // Add tags to songs
+    return filteredSongs.map(song => {
+      const songTagIds = this.songTags
+        .filter(st => st.song_id === song.id)
+        .map(st => st.tag_id);
+      
+      const songTags = this.tags
+        .filter(tag => songTagIds.includes(tag.id))
+        .map(tag => tag.name);
+
+      return { ...song, tags: songTags };
+    });
+  }
+
   // Mock Apple Music library data
   getMockAppleMusicLibrary(): any[] {
     return [
