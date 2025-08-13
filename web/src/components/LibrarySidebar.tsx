@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './LibrarySidebar.css';
 
 export type ViewMode = 'songs' | 'albums' | 'artists' | 'album-detail' | 'artist-detail';

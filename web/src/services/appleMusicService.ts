@@ -8,7 +8,6 @@ declare global {
 
 class AppleMusicService {
   private musicKit: any = null;
-  private isInitialized = false;
   private useMockData = true; // Set to false when you have real Apple Music credentials
 
   async initialize(): Promise<boolean> {
@@ -31,7 +30,6 @@ class AppleMusicService {
       });
 
       this.musicKit = window.MusicKit.getInstance();
-      this.isInitialized = true;
       return true;
     } catch (error) {
       console.error('MusicKit initialization failed:', error);

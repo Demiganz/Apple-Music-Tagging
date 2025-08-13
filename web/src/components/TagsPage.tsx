@@ -72,12 +72,12 @@ export default function TagsPage() {
   const handleDragStart = (e: React.DragEvent, tag: Tag) => {
     setDraggedTag(tag);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.currentTarget.outerHTML);
-    e.currentTarget.style.opacity = '0.5';
+    e.dataTransfer.setData('text/html', (e.currentTarget as HTMLElement).outerHTML);
+    (e.currentTarget as HTMLElement).style.opacity = '0.5';
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
-    e.currentTarget.style.opacity = '1';
+    (e.currentTarget as HTMLElement).style.opacity = '1';
     setDraggedTag(null);
     setDragOverIndex(null);
   };

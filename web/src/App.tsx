@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
 import LibraryPage from './components/LibraryPage';
@@ -8,7 +8,6 @@ import { apiClient } from './services/apiClient';
 import './App.css';
 
 function App() {
-  const [isInitialized, setIsInitialized] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,11 +22,9 @@ function App() {
       setIsLoggedIn(isAuthenticated);
 
       // Initialize Apple Music
-      const success = await appleMusicService.initialize();
-      setIsInitialized(success);
+      await appleMusicService.initialize();
     } catch (error) {
       console.error('App initialization failed:', error);
-      setIsInitialized(true);
     } finally {
       setIsLoading(false);
     }

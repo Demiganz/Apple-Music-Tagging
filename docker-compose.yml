@@ -1,0 +1,73 @@
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: apple-music-db
+    environment:
+      POSTGRES_DB: apple_music_tagger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-defaultpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apple-music-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-defaultpassword}@database:5432/apple_music_tagger
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      USE_MOCK_DATA: ${USE_MOCK_DATA:-true}
+      # Apple Music API credentials (when ready to integrate)
+      APPLE_MUSIC_TEAM_ID: ${APPLE_MUSIC_TEAM_ID:-}
+      APPLE_MUSIC_KEY_ID: ${APPLE_MUSIC_KEY_ID:-}
+      APPLE_MUSIC_PRIVATE_KEY_PATH: ${APPLE_MUSIC_PRIVATE_KEY_PATH:-}
+    ports:
+      - "3001:3001"
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      # Mount for Apple Music private key when ready
+      - ${APPLE_MUSIC_PRIVATE_KEY_PATH:-/dev/null}:/app/keys/apple-music-private-key.p8:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Web Frontend
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: apple-music-web
+    environment:
+      REACT_APP_API_URL: http://localhost:3001
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
