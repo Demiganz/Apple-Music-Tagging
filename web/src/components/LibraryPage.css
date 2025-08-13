@@ -153,28 +153,34 @@
 .songs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: max-content;
   gap: 20px;
   padding: 0 20px;
   flex: 1;
   overflow-y: auto;
+  align-content: start;
 }
 
 .albums-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: max-content;
   gap: 20px;
   padding: 0 20px;
   flex: 1;
   overflow-y: auto;
+  align-content: start;
 }
 
 .artists-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: max-content;
   gap: 20px;
   padding: 0 20px;
   flex: 1;
   overflow-y: auto;
+  align-content: start;
 }
 
 .song-card {
@@ -185,6 +191,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
 }
 
 .song-card:hover {
@@ -302,6 +311,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
 }
 
 .album-card:hover, .artist-card:hover {
@@ -315,7 +327,7 @@
 
 .album-artwork img, .artist-artwork img {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -325,7 +337,7 @@
 }
 
 .album-title, .artist-name {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   color: #333;
@@ -333,13 +345,13 @@
 }
 
 .album-artist {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #666;
   margin: 0 0 4px 0;
 }
 
 .album-song-count, .artist-song-count {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #888;
   margin: 0;
 }
