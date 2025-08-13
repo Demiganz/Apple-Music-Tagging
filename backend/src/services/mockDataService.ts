@@ -269,17 +269,23 @@ class MockDataService {
       );
     }
 
-    // Apply tag filter
+    // Apply tag filter (AND logic - songs must have ALL selected tags)
     if (tags) {
       const tagArray = tags.split(',');
-      const songsWithTags = this.songTags
-        .filter(st => {
-          const tag = this.tags.find(t => t.id === st.tag_id);
-          return tag && tagArray.includes(tag.name);
-        })
-        .map(st => st.song_id);
       
-      filteredSongs = filteredSongs.filter(song => songsWithTags.includes(song.id));
+      filteredSongs = filteredSongs.filter(song => {
+        // Get all tag names for this song
+        const songTagIds = this.songTags
+          .filter(st => st.song_id === song.id)
+          .map(st => st.tag_id);
+        
+        const songTagNames = this.tags
+          .filter(tag => songTagIds.includes(tag.id))
+          .map(tag => tag.name);
+        
+        // Check if song has ALL required tags
+        return tagArray.every(requiredTag => songTagNames.includes(requiredTag));
+      });
     }
 
     // Add tags to songs
