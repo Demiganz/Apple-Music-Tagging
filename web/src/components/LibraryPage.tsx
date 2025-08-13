@@ -269,7 +269,11 @@ export default function LibraryPage() {
                   alt={`${song.title} artwork`}
                 />
               ) : (
-                <div className="no-artwork">♪</div>
+                <div className="no-artwork">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zM21 16c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               )}
             </div>
             <div className="song-info">
@@ -291,7 +295,10 @@ export default function LibraryPage() {
               onClick={(e) => openTagModal(song, e)}
               title="Manage tags"
             >
-              🏷️
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           </div>
         ))
@@ -328,7 +335,12 @@ export default function LibraryPage() {
                     alt={`${album.name} artwork`}
                   />
                 ) : (
-                  <div className="no-artwork">💿</div>
+                  <div className="no-artwork">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  </div>
                 )}
               </div>
               <div className="album-info">
@@ -371,7 +383,11 @@ export default function LibraryPage() {
                     alt={`${artist.name} artwork`}
                   />
                 ) : (
-                  <div className="no-artwork">🎤</div>
+                  <div className="no-artwork">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 )}
               </div>
               <div className="artist-info">

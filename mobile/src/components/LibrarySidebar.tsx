@@ -69,7 +69,7 @@ export default function LibrarySidebar({
                 ]}
                 onPress={() => onViewChange('songs')}
               >
-                <Text style={styles.navIcon}>🎵</Text>
+                <Text style={styles.navIcon}>♪</Text>
                 <Text style={[
                   styles.navLabel,
                   currentView === 'songs' && styles.navLabelActive
@@ -83,7 +83,7 @@ export default function LibrarySidebar({
                 ]}
                 onPress={() => onViewChange('albums')}
               >
-                <Text style={styles.navIcon}>💿</Text>
+                <Text style={styles.navIcon}>⚬</Text>
                 <Text style={[
                   styles.navLabel,
                   currentView === 'albums' && styles.navLabelActive
@@ -97,7 +97,7 @@ export default function LibrarySidebar({
                 ]}
                 onPress={() => onViewChange('artists')}
               >
-                <Text style={styles.navIcon}>🎤</Text>
+                <Text style={styles.navIcon}>♂</Text>
                 <Text style={[
                   styles.navLabel,
                   currentView === 'artists' && styles.navLabelActive
@@ -120,7 +120,7 @@ export default function LibrarySidebar({
             <Text style={[
               styles.navIconCollapsed,
               currentView === 'songs' && styles.navIconCollapsedActive
-            ]}>🎵</Text>
+            ]}>♪</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -133,7 +133,7 @@ export default function LibrarySidebar({
             <Text style={[
               styles.navIconCollapsed,
               currentView === 'albums' && styles.navIconCollapsedActive
-            ]}>💿</Text>
+            ]}>⚬</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -146,7 +146,7 @@ export default function LibrarySidebar({
             <Text style={[
               styles.navIconCollapsed,
               currentView === 'artists' && styles.navIconCollapsedActive
-            ]}>🎤</Text>
+            ]}>♂</Text>
           </TouchableOpacity>
         </View>
       )}

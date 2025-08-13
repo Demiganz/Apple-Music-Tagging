@@ -93,6 +93,13 @@
   font-size: 18px;
   width: 24px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon svg {
+  transition: all 0.2s ease;
 }
 
 .nav-label {
@@ -135,6 +142,17 @@
 
 .nav-item-collapsed.active:hover {
   background: #0056b3;
+}
+
+.nav-item-collapsed .nav-icon {
+  margin-right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item-collapsed .nav-icon svg {
+  transition: all 0.2s ease;
 }
 
 .sidebar-detail {

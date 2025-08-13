@@ -274,7 +274,7 @@ export default function LibraryScreen() {
         style={styles.tagButton}
         onPress={() => openTagModal(item)}
       >
-        <Text style={styles.tagButtonText}>🏷️</Text>
+                        <Text style={styles.tagButtonText}>⚹</Text>
       </TouchableOpacity>
     </View>
   );
@@ -312,7 +312,7 @@ export default function LibraryScreen() {
           />
         ) : (
           <View style={styles.noArtwork}>
-            <Text style={styles.noArtworkText}>💿</Text>
+                            <Text style={styles.noArtworkText}>⚬</Text>
           </View>
         )}
       </View>
@@ -334,7 +334,7 @@ export default function LibraryScreen() {
           />
         ) : (
           <View style={styles.noArtwork}>
-            <Text style={styles.noArtworkText}>🎤</Text>
+                            <Text style={styles.noArtworkText}>♂</Text>
           </View>
         )}
       </View>

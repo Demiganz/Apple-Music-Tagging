@@ -62,7 +62,11 @@ export default function LibrarySidebar({
                 className={`nav-item ${currentView === 'songs' ? 'active' : ''}`}
                 onClick={() => onViewChange('songs')}
               >
-                <span className="nav-icon">🎵</span>
+                <span className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zM21 16c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
                 <span className="nav-label">Songs</span>
               </button>
               
@@ -70,7 +74,12 @@ export default function LibrarySidebar({
                 className={`nav-item ${currentView === 'albums' ? 'active' : ''}`}
                 onClick={() => onViewChange('albums')}
               >
-                <span className="nav-icon">💿</span>
+                <span className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                  </svg>
+                </span>
                 <span className="nav-label">Albums</span>
               </button>
               
@@ -78,7 +87,11 @@ export default function LibrarySidebar({
                 className={`nav-item ${currentView === 'artists' ? 'active' : ''}`}
                 onClick={() => onViewChange('artists')}
               >
-                <span className="nav-icon">🎤</span>
+                <span className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
                 <span className="nav-label">Artists</span>
               </button>
             </div>
@@ -93,7 +106,11 @@ export default function LibrarySidebar({
             onClick={() => onViewChange('songs')}
             title="Songs"
           >
-            <span className="nav-icon">🎵</span>
+            <span className="nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zM21 16c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
           </button>
           
           <button 
@@ -101,7 +118,12 @@ export default function LibrarySidebar({
             onClick={() => onViewChange('albums')}
             title="Albums"
           >
-            <span className="nav-icon">💿</span>
+            <span className="nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </span>
           </button>
           
           <button 
@@ -109,7 +131,11 @@ export default function LibrarySidebar({
             onClick={() => onViewChange('artists')}
             title="Artists"
           >
-            <span className="nav-icon">🎤</span>
+            <span className="nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
           </button>
         </div>
       )}
