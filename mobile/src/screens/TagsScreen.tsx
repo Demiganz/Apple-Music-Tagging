@@ -17,6 +17,8 @@ interface Tag {
   name: string;
   color: string;
   song_count: number;
+  order_index?: number;
+  is_visible?: boolean;
 }
 
 const TAG_COLORS = [
@@ -68,17 +70,61 @@ export default function TagsScreen() {
     setIsCreating(false);
   };
 
+  const toggleTagVisibility = async (tag: Tag) => {
+    const newIsVisible = !tag.is_visible;
+    
+    // Update local state immediately for responsive UI
+    setTags(prevTags => 
+      prevTags.map(t => 
+        t.id === tag.id ? { ...t, is_visible: newIsVisible } : t
+      )
+    );
+
+    // Send update to backend
+    const result = await apiClient.updateTagVisibility(tag.id, newIsVisible);
+    
+    if (!result.success) {
+      // Revert on error
+      setTags(prevTags => 
+        prevTags.map(t => 
+          t.id === tag.id ? { ...t, is_visible: tag.is_visible } : t
+        )
+      );
+      Alert.alert('Error', `Failed to update tag visibility: ${result.error}`);
+    }
+  };
+
   const renderTag = ({ item }: { item: Tag }) => (
-    <View style={styles.tagItem}>
+    <View style={[styles.tagItem, item.is_visible === false && styles.hiddenTagItem]}>
       <View style={styles.tagInfo}>
-        <View style={[styles.tagColor, { backgroundColor: item.color }]} />
+        <View style={[
+          styles.tagColor, 
+          { backgroundColor: item.color },
+          item.is_visible === false && styles.hiddenTagColor
+        ]} />
         <View style={styles.tagDetails}>
-          <Text style={styles.tagName}>{item.name}</Text>
-          <Text style={styles.tagCount}>
+          <Text style={[
+            styles.tagName,
+            item.is_visible === false && styles.hiddenTagName
+          ]}>
+            {item.name}
+          </Text>
+          <Text style={[
+            styles.tagCount,
+            item.is_visible === false && styles.hiddenTagCount
+          ]}>
             {item.song_count} {item.song_count === 1 ? 'song' : 'songs'}
           </Text>
         </View>
       </View>
+      <TouchableOpacity
+        style={styles.visibilityToggle}
+        onPress={() => toggleTagVisibility(item)}
+      >
+        <Text style={styles.visibilityIcon}>
+          {item.is_visible === false ? '○' : '●'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -222,10 +268,17 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hiddenTagItem: {
+    opacity: 0.4,
+    backgroundColor: '#f8f9fa',
   },
   tagInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   tagColor: {
     width: 20,
@@ -245,6 +298,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 2,
+  },
+  hiddenTagColor: {
+    opacity: 0.5,
+  },
+  hiddenTagName: {
+    color: '#999',
+    textDecorationLine: 'line-through',
+  },
+  hiddenTagCount: {
+    color: '#ccc',
+  },
+  visibilityToggle: {
+    padding: 8,
+    marginLeft: 12,
+  },
+  visibilityIcon: {
+    fontSize: 18,
+    color: '#666',
   },
   emptyContainer: {
     flex: 1,

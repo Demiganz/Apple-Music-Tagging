@@ -23,6 +23,7 @@ interface Tag {
   name: string;
   color: string;
   song_count: number;
+  is_visible?: boolean;
 }
 
 interface TagAssignmentModalProps {

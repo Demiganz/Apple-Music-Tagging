@@ -30,6 +30,7 @@ interface Tag {
   name: string;
   color: string;
   song_count: number;
+  is_visible?: boolean;
 }
 
 interface Album {
@@ -466,12 +467,12 @@ export default function LibraryScreen() {
           </TouchableOpacity>
         </View>
         
-        {shouldShowFilters() && tags.length > 0 && (
+        {shouldShowFilters() && tags.filter(tag => tag.is_visible !== false).length > 0 && (
           <View style={styles.tagsFilterContainer}>
             <Text style={styles.filterLabel}>Filter by tags:</Text>
             <FlatList
               horizontal
-              data={tags}
+              data={tags.filter(tag => tag.is_visible !== false)}
               renderItem={renderTagFilter}
               keyExtractor={(item) => item.id.toString()}
               showsHorizontalScrollIndicator={false}
