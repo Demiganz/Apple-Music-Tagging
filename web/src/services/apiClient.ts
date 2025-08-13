@@ -130,6 +130,32 @@ class ApiClient {
     }
   }
 
+  async getOrganizedData(type: 'albums' | 'artists') {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/songs/organize/${type}`, {
+        headers: this.getHeaders()
+      });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error(`Get ${type} failed:`, error);
+      return { success: false, error: error.response?.data?.error || `Failed to fetch ${type}` };
+    }
+  }
+
+  async getSongsByCategory(type: 'album' | 'artist', name: string, artist?: string) {
+    try {
+      const params = artist ? { artist } : {};
+      const response = await axios.get(`${API_BASE_URL}/songs/by/${type}/${encodeURIComponent(name)}`, {
+        headers: this.getHeaders(),
+        params
+      });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error(`Get songs by ${type} failed:`, error);
+      return { success: false, error: error.response?.data?.error || `Failed to fetch songs by ${type}` };
+    }
+  }
+
   logout() {
     this.token = null;
     try {
