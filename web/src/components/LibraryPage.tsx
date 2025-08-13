@@ -20,6 +20,7 @@ interface Tag {
   name: string;
   color: string;
   song_count: number;
+  is_visible?: boolean;
 }
 
 interface Album {
@@ -484,11 +485,11 @@ export default function LibraryPage() {
           </div>
         </div>
 
-        {shouldShowFilters() && tags.length > 0 && (
+        {shouldShowFilters() && tags.filter(tag => tag.is_visible !== false).length > 0 && (
           <div className="tags-filter">
             <h3>Filter by tags:</h3>
             <div className="tag-filters">
-              {tags.map(tag => (
+              {tags.filter(tag => tag.is_visible !== false).map(tag => (
                 <button
                   key={tag.id}
                   className={`tag-filter ${selectedTags.includes(tag.name) ? 'active' : ''}`}

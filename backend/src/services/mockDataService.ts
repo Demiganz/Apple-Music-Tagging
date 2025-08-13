@@ -26,6 +26,8 @@ interface Tag {
   color: string;
   user_id: number;
   created_at: string;
+  order_index?: number;
+  is_visible?: boolean;
   song_count?: number;
 }
 
@@ -155,35 +157,45 @@ class MockDataService {
       name: 'Pop',
       color: '#FF6B6B',
       user_id: 1,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: 0,
+      is_visible: true
     },
     {
       id: 2,
       name: 'Favorites',
       color: '#4ECDC4',
       user_id: 1,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: 1,
+      is_visible: true
     },
     {
       id: 3,
       name: 'Workout',
       color: '#45B7D1',
       user_id: 1,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: 2,
+      is_visible: false
     },
     {
       id: 4,
       name: 'Chill',
       color: '#96CEB4',
       user_id: 1,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: 3,
+      is_visible: true
     },
     {
       id: 5,
       name: 'Road Trip',
       color: '#FECA57',
       user_id: 1,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: 4,
+      is_visible: true
     }
   ];
 
@@ -288,14 +300,14 @@ class MockDataService {
       });
     }
 
-    // Add tags to songs
+    // Add tags to songs (only visible tags)
     const songsWithTags = filteredSongs.map(song => {
       const songTagIds = this.songTags
         .filter(st => st.song_id === song.id)
         .map(st => st.tag_id);
       
       const songTags = this.tags
-        .filter(tag => songTagIds.includes(tag.id))
+        .filter(tag => songTagIds.includes(tag.id) && tag.is_visible !== false)
         .map(tag => tag.name);
 
       return { ...song, tags: songTags };
@@ -315,10 +327,12 @@ class MockDataService {
   async getTags(userId: number): Promise<Tag[]> {
     const userTags = this.tags.filter(tag => tag.user_id === userId);
     
-    return userTags.map(tag => {
-      const songCount = this.songTags.filter(st => st.tag_id === tag.id).length;
-      return { ...tag, song_count: songCount };
-    });
+    return userTags
+      .map(tag => {
+        const songCount = this.songTags.filter(st => st.tag_id === tag.id).length;
+        return { ...tag, song_count: songCount };
+      })
+      .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
   }
 
   async createTag(name: string, color: string, userId: number): Promise<Tag> {
@@ -331,12 +345,18 @@ class MockDataService {
       throw new Error('Tag name already exists');
     }
 
+    // Get the highest order_index for this user and add 1
+    const userTags = this.tags.filter(tag => tag.user_id === userId);
+    const maxOrder = Math.max(...userTags.map(tag => tag.order_index || 0), -1);
+
     const tag: Tag = {
       id: this.nextTagId++,
       name,
       color,
       user_id: userId,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      order_index: maxOrder + 1,
+      is_visible: true
     };
     
     this.tags.push(tag);
@@ -376,6 +396,36 @@ class MockDataService {
         !(st.song_id === songId && st.tag_id === tagId)
       );
     }
+  }
+
+  async updateTagOrder(tagIds: number[], userId: number): Promise<void> {
+    // Verify all tags belong to the user
+    const userTagIds = this.tags
+      .filter(tag => tag.user_id === userId)
+      .map(tag => tag.id);
+    
+    const invalidTags = tagIds.filter(id => !userTagIds.includes(id));
+    if (invalidTags.length > 0) {
+      throw new Error('Some tags do not belong to user');
+    }
+
+    // Update order_index for each tag
+    tagIds.forEach((tagId, index) => {
+      const tag = this.tags.find(t => t.id === tagId);
+      if (tag) {
+        tag.order_index = index;
+      }
+    });
+  }
+
+  async updateTagVisibility(tagId: number, isVisible: boolean, userId: number): Promise<void> {
+    const tag = this.tags.find(t => t.id === tagId && t.user_id === userId);
+    
+    if (!tag) {
+      throw new Error('Tag not found');
+    }
+
+    tag.is_visible = isVisible;
   }
 
   // Organization methods
@@ -446,14 +496,14 @@ class MockDataService {
       });
     }
 
-    // Add tags to songs
+    // Add tags to songs (only visible tags)
     return filteredSongs.map(song => {
       const songTagIds = this.songTags
         .filter(st => st.song_id === song.id)
         .map(st => st.tag_id);
       
       const songTags = this.tags
-        .filter(tag => songTagIds.includes(tag.id))
+        .filter(tag => songTagIds.includes(tag.id) && tag.is_visible !== false)
         .map(tag => tag.name);
 
       return { ...song, tags: songTags };

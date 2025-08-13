@@ -155,4 +155,74 @@ router.delete('/assign', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// Update tag order
+router.put('/order', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId!;
+    const { tagIds } = req.body;
+
+    if (!Array.isArray(tagIds)) {
+      return res.status(400).json({ error: 'tagIds must be an array' });
+    }
+
+    const useMockData = process.env.USE_MOCK_DATA === 'true' || !process.env.DATABASE_URL;
+
+    if (useMockData) {
+      // Use mock data service
+      await mockDataService.updateTagOrder(tagIds, userId);
+      res.json({ message: 'Tag order updated successfully' });
+    } else {
+      // Original database logic - update order_index for each tag
+      const updatePromises = tagIds.map((tagId, index) => 
+        pool.query(
+          'UPDATE tags SET order_index = $1 WHERE id = $2 AND user_id = $3',
+          [index, tagId, userId]
+        )
+      );
+
+      await Promise.all(updatePromises);
+      res.json({ message: 'Tag order updated successfully' });
+    }
+  } catch (error: any) {
+    console.error('Update tag order error:', error);
+    res.status(500).json({ error: error.message || 'Failed to update tag order' });
+  }
+});
+
+// Update tag visibility
+router.put('/:id/visibility', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.userId!;
+    const tagId = parseInt(req.params.id);
+    const { isVisible } = req.body;
+
+    if (typeof isVisible !== 'boolean') {
+      return res.status(400).json({ error: 'isVisible must be a boolean' });
+    }
+
+    const useMockData = process.env.USE_MOCK_DATA === 'true' || !process.env.DATABASE_URL;
+
+    if (useMockData) {
+      // Use mock data service
+      await mockDataService.updateTagVisibility(tagId, isVisible, userId);
+      res.json({ message: 'Tag visibility updated successfully' });
+    } else {
+      // Original database logic
+      const result = await pool.query(
+        'UPDATE tags SET is_visible = $1 WHERE id = $2 AND user_id = $3',
+        [isVisible, tagId, userId]
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Tag not found' });
+      }
+
+      res.json({ message: 'Tag visibility updated successfully' });
+    }
+  } catch (error: any) {
+    console.error('Update tag visibility error:', error);
+    res.status(500).json({ error: error.message || 'Failed to update tag visibility' });
+  }
+});
+
 export default router;

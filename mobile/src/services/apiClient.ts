@@ -131,6 +131,34 @@ class ApiClient {
     }
   }
 
+  async updateTagOrder(tagIds: number[]) {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/tags/order`,
+        { tagIds },
+        { headers: this.getHeaders() }
+      );
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error('Update tag order failed:', error);
+      return { success: false, error: error.response?.data?.error || 'Failed to update tag order' };
+    }
+  }
+
+  async updateTagVisibility(tagId: number, isVisible: boolean) {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/tags/${tagId}/visibility`,
+        { isVisible },
+        { headers: this.getHeaders() }
+      );
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error('Update tag visibility failed:', error);
+      return { success: false, error: error.response?.data?.error || 'Failed to update tag visibility' };
+    }
+  }
+
   async getOrganizedData(type: 'albums' | 'artists') {
     try {
       const response = await axios.get(`${API_BASE_URL}/songs/organize/${type}`, {

@@ -7,6 +7,8 @@ interface Tag {
   name: string;
   color: string;
   song_count: number;
+  order_index?: number;
+  is_visible?: boolean;
 }
 
 const TAG_COLORS = [
@@ -22,6 +24,8 @@ export default function TagsPage() {
   const [newTagName, setNewTagName] = useState('');
   const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0]);
   const [isCreating, setIsCreating] = useState(false);
+  const [draggedTag, setDraggedTag] = useState<Tag | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     loadTags();
@@ -65,6 +69,83 @@ export default function TagsPage() {
     setSelectedColor(TAG_COLORS[0]);
   };
 
+  const handleDragStart = (e: React.DragEvent, tag: Tag) => {
+    setDraggedTag(tag);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget.outerHTML);
+    e.currentTarget.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.style.opacity = '1';
+    setDraggedTag(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (!draggedTag) return;
+
+    const dragIndex = tags.findIndex(tag => tag.id === draggedTag.id);
+    if (dragIndex === dropIndex) return;
+
+    // Create new array with reordered tags
+    const newTags = [...tags];
+    const [draggedItem] = newTags.splice(dragIndex, 1);
+    newTags.splice(dropIndex, 0, draggedItem);
+
+    // Update local state immediately for responsive UI
+    setTags(newTags);
+    setDragOverIndex(null);
+
+    // Send update to backend
+    const tagIds = newTags.map(tag => tag.id);
+    const result = await apiClient.updateTagOrder(tagIds);
+    
+    if (!result.success) {
+      // Revert on error
+      setTags(tags);
+      alert(`Failed to update tag order: ${result.error}`);
+    }
+  };
+
+  const toggleTagVisibility = async (tag: Tag, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent drag from starting
+    
+    const newIsVisible = !tag.is_visible;
+    
+    // Update local state immediately for responsive UI
+    setTags(prevTags => 
+      prevTags.map(t => 
+        t.id === tag.id ? { ...t, is_visible: newIsVisible } : t
+      )
+    );
+
+    // Send update to backend
+    const result = await apiClient.updateTagVisibility(tag.id, newIsVisible);
+    
+    if (!result.success) {
+      // Revert on error
+      setTags(prevTags => 
+        prevTags.map(t => 
+          t.id === tag.id ? { ...t, is_visible: tag.is_visible } : t
+        )
+      );
+      alert(`Failed to update tag visibility: ${result.error}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -93,8 +174,20 @@ export default function TagsPage() {
             <p>Create tags to organize your music library</p>
           </div>
         ) : (
-          tags.map(tag => (
-            <div key={tag.id} className="tag-card">
+          tags.map((tag, index) => (
+            <div 
+              key={tag.id} 
+              className={`tag-card ${dragOverIndex === index ? 'drag-over' : ''} ${draggedTag?.id === tag.id ? 'dragging' : ''} ${tag.is_visible === false ? 'hidden' : ''}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, tag)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+            >
+              <div className="drag-handle">
+                <span>⋮⋮</span>
+              </div>
               <div 
                 className="tag-color-indicator" 
                 style={{ backgroundColor: tag.color }}
@@ -105,6 +198,24 @@ export default function TagsPage() {
                   {tag.song_count} {tag.song_count === 1 ? 'song' : 'songs'}
                 </p>
               </div>
+              <button 
+                className="visibility-toggle"
+                onClick={(e) => toggleTagVisibility(tag, e)}
+                title={tag.is_visible === false ? 'Show tag on Library page' : 'Hide tag from Library page'}
+              >
+                {tag.is_visible === false ? (
+                  // Hidden eye icon (crossed out)
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.826M9.363 5.365A9.466 9.466 0 0112 5c4.418 0 8 2.686 8 6 0 1.3-.8 2.5-2.1 3.4M6.74 15.1C4.8 14.2 4 13 4 11c0-1.657 1.5-3.1 3.8-4.1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  // Visible eye icon
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
             </div>
           ))
         )}
