@@ -168,17 +168,17 @@ export default function LibraryScreen() {
       if (library && library.data) {
         const result = await apiClient.importSongs(library.data);
         if (result.success) {
-          Alert.alert('Success', `Imported ${library.data.length} songs`);
+          Alert.alert('Library Refreshed', `Found ${library.data.length} songs in your library.`);
           // Refresh all data after import
           loadSongs();
           loadAlbums();
           loadArtists();
         } else {
-          Alert.alert('Import Failed', result.error);
+          Alert.alert('Refresh Failed', result.error);
         }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to import songs');
+      Alert.alert('Error', 'Failed to refresh library');
     } finally {
       setIsImporting(false);
     }
@@ -365,8 +365,8 @@ export default function LibraryScreen() {
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>No albums found</Text>
                 <Text style={styles.emptySubtext}>
-                  {albums.length === 0 
-                    ? 'Import songs from Apple Music to see your albums'
+{albums.length === 0 
+                    ? 'No albums found. Try refreshing your library or check your Apple Music account.'
                     : 'Try adjusting your search query'}
                 </Text>
               </View>
@@ -388,8 +388,8 @@ export default function LibraryScreen() {
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>No artists found</Text>
                 <Text style={styles.emptySubtext}>
-                  {artists.length === 0 
-                    ? 'Import songs from Apple Music to see your artists'
+{artists.length === 0 
+                    ? 'No artists found. Try refreshing your library or check your Apple Music account.'
                     : 'Try adjusting your search query'}
                 </Text>
               </View>
@@ -411,8 +411,8 @@ export default function LibraryScreen() {
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>No songs found</Text>
                 <Text style={styles.emptySubtext}>
-                  {songs.length === 0 && selectedTags.length === 0 && !searchQuery 
-                    ? 'Import songs from Apple Music to get started' 
+{songs.length === 0 && selectedTags.length === 0 && !searchQuery 
+                    ? 'No songs in your library yet. Try refreshing your library or check your Apple Music account.' 
                     : 'Try adjusting your search or filters'}
                 </Text>
               </View>
@@ -461,7 +461,7 @@ export default function LibraryScreen() {
             disabled={isImporting}
           >
             <Text style={styles.importButtonText}>
-              {isImporting ? 'Importing...' : 'Import Songs'}
+              {isImporting ? 'Refreshing...' : 'Refresh Library'}
             </Text>
           </TouchableOpacity>
         </View>

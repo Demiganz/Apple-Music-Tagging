@@ -193,7 +193,7 @@ export default function LibraryPage() {
       if (library && library.data) {
         const result = await apiClient.importSongs(library.data);
         if (result.success) {
-          alert(`Imported ${library.data.length} songs successfully!`);
+          alert(`Library refreshed! Found ${library.data.length} songs.`);
           // Refresh all data after import
           loadSongs();
           loadAlbums();
@@ -202,7 +202,7 @@ export default function LibraryPage() {
           alert(`Import failed: ${result.error}`);
         }
       } else {
-        alert('No songs found in your Apple Music library');
+        alert('No new songs found in your Apple Music library.');
       }
     } catch (error) {
       alert('Failed to import songs');
@@ -253,8 +253,8 @@ export default function LibraryPage() {
         <div className="empty-state">
           <h3>No songs found</h3>
           <p>
-            {songs.length === 0 && selectedTags.length === 0 && !searchQuery 
-              ? 'Import songs from Apple Music to get started' 
+{songs.length === 0 && selectedTags.length === 0 && !searchQuery 
+              ? 'No songs in your library yet. Try refreshing your library or check your Apple Music account.' 
               : 'Try adjusting your search or filters'}
           </p>
         </div>
@@ -312,8 +312,8 @@ export default function LibraryPage() {
           <div className="empty-state">
             <h3>No albums found</h3>
             <p>
-              {albums.length === 0 
-                ? 'Import songs from Apple Music to see your albums'
+{albums.length === 0 
+                ? 'No albums found. Try refreshing your library or check your Apple Music account.'
                 : 'Try adjusting your search query'}
             </p>
           </div>
@@ -355,8 +355,8 @@ export default function LibraryPage() {
           <div className="empty-state">
             <h3>No artists found</h3>
             <p>
-              {artists.length === 0 
-                ? 'Import songs from Apple Music to see your artists'
+{artists.length === 0 
+                ? 'No artists found. Try refreshing your library or check your Apple Music account.'
                 : 'Try adjusting your search query'}
             </p>
           </div>
@@ -479,7 +479,7 @@ export default function LibraryPage() {
               onClick={importFromAppleMusic}
               disabled={isImporting}
             >
-              {isImporting ? 'Importing...' : 'Import from Apple Music'}
+              {isImporting ? 'Refreshing...' : 'Refresh Library'}
             </button>
           </div>
         </div>

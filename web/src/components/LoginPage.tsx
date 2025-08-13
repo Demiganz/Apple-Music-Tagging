@@ -24,6 +24,21 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         const result = await apiClient.login(appleMusicId, undefined, 'Apple Music User');
         
         if (result.success) {
+          // Automatically import user's Apple Music library
+          try {
+            const library = await appleMusicService.getUserLibrary(0, 100);
+            if (library && library.data && library.data.length > 0) {
+              const importResult = await apiClient.importSongs(library.data);
+              if (!importResult.success) {
+                console.warn('Failed to import library:', importResult.error);
+                // Don't block login for import failures, just log it
+              }
+            }
+          } catch (importError) {
+            console.warn('Failed to import library:', importError);
+            // Don't block login for import failures
+          }
+          
           onLogin();
         } else {
           setError(result.error);
@@ -55,14 +70,15 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           onClick={handleAppleMusicLogin}
           disabled={isLoading}
         >
-          {isLoading ? 'Connecting...' : 'Connect Apple Music'}
+{isLoading ? 'Connecting & Importing Library...' : 'Connect Apple Music'}
         </button>
         
         <div className="login-info">
           <p>This app allows you to:</p>
           <ul>
-            <li>Import your Apple Music library</li>
+            <li>Automatically sync your Apple Music library</li>
             <li>Create custom tags for organization</li>
+            <li>Browse by songs, albums, and artists</li>
             <li>Filter and search your music by tags</li>
             <li>Play songs directly from the web</li>
           </ul>
