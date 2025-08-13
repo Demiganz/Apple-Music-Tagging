@@ -219,6 +219,15 @@ export default function LibraryPage() {
     }
   };
 
+  const getTagColor = (tagName: string): string | null => {
+    const tag = tags.find(t => t.name === tagName);
+    return tag?.color || null;
+  };
+
+  const isTagFiltered = (tagName: string): boolean => {
+    return selectedTags.includes(tagName);
+  };
+
   const openTagModal = (song: Song, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent song from playing
     setSelectedSong(song);
@@ -282,11 +291,23 @@ export default function LibraryPage() {
               <p className="song-album">{song.album}</p>
               {song.tags && song.tags.length > 0 && (
                 <div className="song-tags">
-                  {song.tags.map((tag, index) => (
-                    <span key={index} className="song-tag">
-                      {tag}
-                    </span>
-                  ))}
+                  {song.tags.map((tag, index) => {
+                    const tagColor = getTagColor(tag);
+                    const isFiltered = isTagFiltered(tag);
+                    return (
+                      <span 
+                        key={index} 
+                        className={`song-tag ${isFiltered ? 'song-tag-filtered' : ''}`}
+                        style={isFiltered && tagColor ? { 
+                          backgroundColor: tagColor,
+                          color: 'white',
+                          fontWeight: 'bold'
+                        } : {}}
+                      >
+                        {tag}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>

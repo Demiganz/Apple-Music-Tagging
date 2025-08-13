@@ -245,6 +245,15 @@ export default function LibraryScreen() {
     }
   };
 
+  const getTagColor = (tagName: string): string | null => {
+    const tag = tags.find(t => t.name === tagName);
+    return tag?.color || null;
+  };
+
+  const isTagFiltered = (tagName: string): boolean => {
+    return selectedTags.includes(tagName);
+  };
+
   const renderSong = ({ item }: { item: Song }) => (
     <View style={styles.songItem}>
       <TouchableOpacity 
@@ -262,11 +271,37 @@ export default function LibraryScreen() {
           <Text style={styles.songArtist}>{item.artist}</Text>
           {item.tags && item.tags.length > 0 && (
             <View style={styles.tagsContainer}>
-              {item.tags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag}</Text>
-                </View>
-              ))}
+              {item.tags.map((tag, index) => {
+                const tagColor = getTagColor(tag);
+                const isFiltered = isTagFiltered(tag);
+                return (
+                  <View 
+                    key={index} 
+                    style={[
+                      styles.tag,
+                      isFiltered && tagColor ? {
+                        backgroundColor: tagColor,
+                        transform: [{ scale: 1.05 }],
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 3,
+                        elevation: 4,
+                      } : {}
+                    ]}
+                  >
+                    <Text style={[
+                      styles.tagText,
+                      isFiltered && tagColor ? {
+                        color: 'white',
+                        fontWeight: 'bold',
+                      } : {}
+                    ]}>
+                      {tag}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
           )}
         </View>
